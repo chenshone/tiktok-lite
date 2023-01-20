@@ -18,7 +18,7 @@ func main() {
 	}
 	g.UseDB(dal.DB)
 	g.ApplyBasic(
-		g.GenerateModelAs("people", "Person"),
+		g.GenerateAllTable()...,
 	)
 	g.Execute()
 }

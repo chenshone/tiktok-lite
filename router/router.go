@@ -1,8 +1,7 @@
 package router
 
 import (
-	"context"
-	"github.com/chenshone/tiktok-lite/service"
+	"github.com/chenshone/tiktok-lite/controller"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,10 +13,10 @@ func InitRouter(r *gin.Engine) {
 		})
 	})
 
-	r.GET("/test", func(c *gin.Context) {
-		service.GetName(1, context.Background())
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+	// user api
+	r.GET("/user/:id", func(c *gin.Context) {
+		userId := c.Param("id")
+		userInfo := controller.GetUser(userId)
+		c.JSON(userInfo.Code, userInfo)
 	})
 }
