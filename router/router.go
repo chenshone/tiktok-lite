@@ -5,6 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type loginOrRegisterReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func InitRouter(r *gin.Engine) {
 	// test api
 	r.GET("/ping", func(c *gin.Context) {
@@ -14,9 +19,23 @@ func InitRouter(r *gin.Engine) {
 	})
 
 	// user api
-	r.GET("/user/:id", func(c *gin.Context) {
-		userId := c.Param("id")
-		userInfo := controller.GetUser(userId)
-		c.JSON(userInfo.Code, userInfo)
+	user := r.Group("/douyin/user")
+	user.GET("/", func(c *gin.Context) {
+		userID := c.Query("user_id")
+		//token := c.Query("token")
+		userInfo := controller.GetUserInfo(userID)
+		c.JSON(200, userInfo)
+	})
+	user.POST("/login", func(c *gin.Context) {
+		userInfo := loginOrRegisterReq{}
+		_ = c.ShouldBindJSON(&userInfo)
+		data := controller.Login(userInfo.Username, userInfo.Password)
+		c.JSON(200, data)
+	})
+	user.POST("/register", func(c *gin.Context) {
+		userInfo := loginOrRegisterReq{}
+		_ = c.ShouldBindJSON(&userInfo)
+		data := controller.Register(userInfo.Username, userInfo.Password)
+		c.JSON(200, data)
 	})
 }
