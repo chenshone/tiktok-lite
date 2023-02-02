@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/chenshone/tiktok-lite/controller"
+	"github.com/chenshone/tiktok-lite/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +21,8 @@ func InitRouter(r *gin.Engine) {
 
 	// user api
 	user := r.Group("/douyin/user")
-	user.GET("/", func(c *gin.Context) {
+	user.GET("/", middleware.JWTAuth(), func(c *gin.Context) {
 		userID := c.Query("user_id")
-		//token := c.Query("token")
 		userInfo := controller.GetUserInfo(userID)
 		c.JSON(200, userInfo)
 	})
@@ -30,6 +30,7 @@ func InitRouter(r *gin.Engine) {
 		userInfo := loginOrRegisterReq{}
 		_ = c.ShouldBindJSON(&userInfo)
 		data := controller.Login(userInfo.Username, userInfo.Password)
+
 		c.JSON(200, data)
 	})
 	user.POST("/register", func(c *gin.Context) {

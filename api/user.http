@@ -1,5 +1,6 @@
+
 ### user info
-GET http://localhost:8080/douyin/user/?user_id=1
+GET http://localhost:8080/douyin/user/?user_id=1&token={{token}}
 
 ### login
 POST http://localhost:8080/douyin/user/login/

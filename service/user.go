@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"github.com/chenshone/tiktok-lite/util/util"
+	"strconv"
 	"strings"
 )
 
@@ -101,8 +103,10 @@ func Login(username string, password string) (*UserToken, error) {
 		return nil, errors.New("用户名/密码错误")
 	}
 
+	jwt := util.JWT{}
+	token := jwt.GenerateToken(strconv.Itoa(int(data[0].ID)), 1)
 	return &UserToken{
 		ID:    int(data[0].ID),
-		Token: "",
+		Token: token,
 	}, nil
 }
