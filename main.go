@@ -18,6 +18,8 @@ func main() {
 
 	router.InitRouter(r)
 
+	r.StaticFS("/assets", gin.Dir("./assets", true))
+
 	err := r.Run()
 	if err != nil {
 		return

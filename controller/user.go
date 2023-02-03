@@ -35,30 +35,30 @@ func GetUserInfo(id string) *UserInfoRes {
 	}
 }
 
-type RegisterAndLoginRes struct {
+type RegisterAndLoginResp struct {
 	Code   int    `json:"status_code"`
 	Msg    string `json:"status_msg"`
 	UserID int    `json:"user_id"`
 	Token  string `json:"token"`
 }
 
-func Register(username string, password string) *RegisterAndLoginRes {
+func Register(username string, password string) *RegisterAndLoginResp {
 	err := service.Register(username, password)
 	if err != nil {
-		return &RegisterAndLoginRes{
+		return &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		}
 	}
 	data, err := service.Login(username, password)
 	if err != nil {
-		return &RegisterAndLoginRes{
+		return &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		}
 	}
 
-	return &RegisterAndLoginRes{
+	return &RegisterAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,
@@ -66,16 +66,16 @@ func Register(username string, password string) *RegisterAndLoginRes {
 	}
 }
 
-func Login(username string, password string) *RegisterAndLoginRes {
+func Login(username string, password string) *RegisterAndLoginResp {
 	data, err := service.Login(username, password)
 	if err != nil {
-		return &RegisterAndLoginRes{
+		return &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		}
 	}
 
-	return &RegisterAndLoginRes{
+	return &RegisterAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,

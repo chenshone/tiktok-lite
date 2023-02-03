@@ -1,9 +1,15 @@
 package util
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"github.com/disintegration/imaging"
 	"github.com/golang-jwt/jwt/v4"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -50,4 +56,52 @@ func (j *JWT) ParseToken(tokenString string) (string, error) {
 		return "", errors.New("invalid token")
 	}
 	return claims.UserID, nil
+}
+
+// Mkdir 定义一个创建文件目录的方法
+func Mkdir(basePath string) string {
+	//	1.获取当前时间,并且格式化时间
+	folderName := time.Now().Format("2006/01/02/")
+	folderPath := filepath.Join(basePath, folderName)
+	//使用mkdirall会创建多层级目录
+	err := os.MkdirAll(folderPath, os.ModePerm)
+	if err != nil {
+		return ""
+	}
+	return folderPath + "/"
+}
+
+func CheckExt(filename string) bool {
+	ext := filepath.Ext(filename)
+	if ext == ".mp4" {
+		return true
+	}
+	return false
+}
+
+func GetVideoCover(videoPath, snapshotPath string, frameNum int) error {
+	buf := bytes.NewBuffer(nil)
+	err := ffmpeg.Input(videoPath).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frameNum)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(buf, os.Stdout).
+		Run()
+	if err != nil {
+		log.Fatal("生成缩略图失败：", err)
+		return err
+	}
+
+	img, err := imaging.Decode(buf)
+	if err != nil {
+		log.Fatal("生成缩略图失败：", err)
+		return err
+	}
+
+	err = imaging.Save(img, snapshotPath)
+	if err != nil {
+		log.Fatal("生成缩略图失败：", err)
+		return err
+	}
+
+	return nil
 }

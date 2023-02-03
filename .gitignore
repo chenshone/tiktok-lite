@@ -1,2 +1,5 @@
 .idea
 main
+test_files
+assets
+.DS_Store
