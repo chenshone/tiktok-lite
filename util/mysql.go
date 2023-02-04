@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/chenshone/tiktok-lite/dal"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 )
 
 func main() {
@@ -17,8 +18,10 @@ func main() {
 		panic(err)
 	}
 	g.UseDB(dal.DB)
-	g.ApplyBasic(
-		g.GenerateAllTable()...,
-	)
+	user := g.GenerateModel("user")
+	video := g.GenerateModel("video", gen.FieldRelate(field.BelongsTo, "Author", user, &field.RelateConfig{
+		GORMTag: "foreignKey:UserID",
+	}))
+	g.ApplyBasic(user, video)
 	g.Execute()
 }

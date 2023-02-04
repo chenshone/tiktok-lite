@@ -36,6 +36,11 @@ func newVideo(db *gorm.DB, opts ...gen.DOOption) video {
 	_video.Title = field.NewString(tableName, "title")
 	_video.CreateAt = field.NewTime(tableName, "create_at")
 	_video.UpdateAt = field.NewTime(tableName, "update_at")
+	_video.Author = videoBelongsToAuthor{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Author", "model.User"),
+	}
 
 	_video.fillFieldMap()
 
@@ -55,6 +60,7 @@ type video struct {
 	Title         field.String
 	CreateAt      field.Time
 	UpdateAt      field.Time
+	Author        videoBelongsToAuthor
 
 	fieldMap map[string]field.Expr
 }
@@ -102,7 +108,7 @@ func (v *video) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *video) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 9)
+	v.fieldMap = make(map[string]field.Expr, 10)
 	v.fieldMap["id"] = v.ID
 	v.fieldMap["user_id"] = v.UserID
 	v.fieldMap["play_url"] = v.PlayURL
@@ -112,6 +118,7 @@ func (v *video) fillFieldMap() {
 	v.fieldMap["title"] = v.Title
 	v.fieldMap["create_at"] = v.CreateAt
 	v.fieldMap["update_at"] = v.UpdateAt
+
 }
 
 func (v video) clone(db *gorm.DB) video {
@@ -122,6 +129,72 @@ func (v video) clone(db *gorm.DB) video {
 func (v video) replaceDB(db *gorm.DB) video {
 	v.videoDo.ReplaceDB(db)
 	return v
+}
+
+type videoBelongsToAuthor struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a videoBelongsToAuthor) Where(conds ...field.Expr) *videoBelongsToAuthor {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a videoBelongsToAuthor) WithContext(ctx context.Context) *videoBelongsToAuthor {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a videoBelongsToAuthor) Model(m *model.Video) *videoBelongsToAuthorTx {
+	return &videoBelongsToAuthorTx{a.db.Model(m).Association(a.Name())}
+}
+
+type videoBelongsToAuthorTx struct{ tx *gorm.Association }
+
+func (a videoBelongsToAuthorTx) Find() (result *model.User, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a videoBelongsToAuthorTx) Append(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a videoBelongsToAuthorTx) Replace(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a videoBelongsToAuthorTx) Delete(values ...*model.User) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a videoBelongsToAuthorTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a videoBelongsToAuthorTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type videoDo struct{ gen.DO }

@@ -21,6 +21,7 @@ type Video struct {
 	Title         string    `gorm:"column:title;not null" json:"title"`
 	CreateAt      time.Time `gorm:"column:create_at;default:CURRENT_TIMESTAMP" json:"create_at"`
 	UpdateAt      time.Time `gorm:"column:update_at;default:CURRENT_TIMESTAMP" json:"update_at"`
+	Author        User      `gorm:"foreignKey:UserID" json:"author"`
 }
 
 // TableName Video's table name

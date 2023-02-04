@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"time"
 )
 
 func PublishVideo(userId int, videoPath string, coverPath string, title string) error {
@@ -38,19 +38,10 @@ type Author struct {
 	IsFollow      bool   `json:"is_follow"`
 }
 
-func GetVideoList(userId int) ([]*VideoInfo, error) {
+func GetVideoListByUserId(userId int) ([]*VideoInfo, error) {
 	video := q.Video
-	u := q.User
-	udo := u.WithContext(context.Background())
 	vdo := video.WithContext(context.Background())
-
-	var user Author
-	err := udo.Where(u.ID.Eq(int32(userId))).Scan(&user)
-	if err != nil {
-		return nil, errors.New("用户不存在")
-	}
-
-	data, err := vdo.Where(video.UserID.Eq(int32(userId))).Find()
+	data, err := vdo.Where(video.UserID.Eq(int32(userId))).Preload(video.Author).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +55,45 @@ func GetVideoList(userId int) ([]*VideoInfo, error) {
 			FavoriteCount: int(v.FavoriteCount),
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
-			Author:        user,
-			IsFavorite:    false,
+			Author: Author{
+				ID:            int(v.Author.ID),
+				Username:      v.Author.Username,
+				FollowCount:   int(v.Author.FollowCount),
+				FollowerCount: int(v.Author.FollowerCount),
+				IsFollow:      false,
+			},
+			IsFavorite: false,
+		})
+	}
+	return videos, nil
+}
+
+// GetVideoListByTime 按发布时间倒序获取最新的视频列表
+func GetVideoListByTime(lastTime time.Time) ([]*VideoInfo, error) {
+	v := q.Video
+	vdo := v.WithContext(context.Background())
+	data, err := vdo.Where(v.CreateAt.Lt(lastTime)).Preload(v.Author).Order(v.CreateAt.Desc()).Limit(30).Find()
+	if err != nil {
+		return nil, err
+	}
+
+	var videos []*VideoInfo
+	for _, v := range data {
+		videos = append(videos, &VideoInfo{
+			ID:            int(v.ID),
+			PlayURL:       v.PlayURL,
+			CoverURL:      v.CoverURL,
+			FavoriteCount: int(v.FavoriteCount),
+			CommentCount:  int(v.CommentCount),
+			Title:         v.Title,
+			Author: Author{
+				ID:            int(v.Author.ID),
+				Username:      v.Author.Username,
+				FollowCount:   int(v.Author.FollowCount),
+				FollowerCount: int(v.Author.FollowerCount),
+				IsFollow:      false,
+			},
+			IsFavorite: false,
 		})
 	}
 	return videos, nil

@@ -1,0 +1,3 @@
+
+### 视频流接口
+GET http://localhost:8080/douyin/feed/?token={{token}}

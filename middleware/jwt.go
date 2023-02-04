@@ -3,7 +3,6 @@ package middleware
 import (
 	"github.com/chenshone/tiktok-lite/util/util"
 	"github.com/gin-gonic/gin"
-	"log"
 	"strconv"
 )
 
@@ -35,8 +34,6 @@ func JWTAuth() func(c *gin.Context) {
 		jwt := util.JWT{}
 		claim, err1 := jwt.ParseToken(token)
 		userId, err2 := strconv.Atoi(claim)
-		log.Println(claim)
-		log.Println(token)
 		if err1 != nil || err2 != nil {
 			c.JSON(200, &gin.H{
 				"status_code": -1,

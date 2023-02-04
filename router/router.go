@@ -101,7 +101,19 @@ func InitRouter(r *gin.Engine) {
 	})
 	publish.GET("/list", middleware.JWTAuth(), func(c *gin.Context) {
 		userID := c.GetInt("user_id")
-		data := controller.GetVideoList(userID)
+		data := controller.GetVideoListByUserId(userID)
+		c.JSON(200, data)
+	})
+
+	// feed api
+	feed := r.Group("/douyin/feed")
+	feed.GET("/", func(c *gin.Context) {
+		lastTime := c.Query("last_time")
+		_ = c.Query("token")
+		if lastTime == "" {
+			lastTime = time.Now().Format("2006-01-02 15:04:05")
+		}
+		data := controller.GetVideoListByLastTime(lastTime)
 		c.JSON(200, data)
 	})
 }
