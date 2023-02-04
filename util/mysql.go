@@ -19,6 +19,7 @@ func main() {
 	}
 	g.UseDB(dal.DB)
 	user := g.GenerateModel("user")
+
 	video := g.GenerateModel("video", gen.FieldRelate(field.BelongsTo, "Author", user, &field.RelateConfig{
 		GORMTag: "foreignKey:UserID",
 	}))
