@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/chenshone/tiktok-lite/conf"
 	"github.com/chenshone/tiktok-lite/dal/model"
 	"time"
 )
@@ -12,8 +13,8 @@ func PublishVideo(userId int, videoPath string, coverPath string, title string) 
 
 	newVedio := model.Video{
 		UserID:   int32(userId),
-		PlayURL:  videoPath,
-		CoverURL: coverPath,
+		PlayURL:  conf.BaseURL + videoPath,
+		CoverURL: conf.BaseURL + coverPath,
 		Title:    title,
 	}
 	err := do.Create(&newVedio)

@@ -14,7 +14,6 @@ func main() {
 	}
 	query.SetDefault(dal.DB)
 	r := gin.Default()
-	r.Use(gin.Logger())
 
 	router.InitRouter(r)
 

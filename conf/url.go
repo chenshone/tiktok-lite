@@ -1,3 +1,3 @@
 package conf
 
-const BaseURL = "http://127.0.0.1:8080/"
+const BaseURL = "http://192.168.3.10:8080/"

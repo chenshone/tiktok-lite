@@ -2,37 +2,46 @@ package controller
 
 import (
 	"github.com/chenshone/tiktok-lite/service"
+	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-type UserInfoRes struct {
+type loginOrRegisterReq struct {
+	Username string `json:"username" form:"username"`
+	Password string `json:"password" form:"password"`
+}
+
+type UserInfoResp struct {
 	Code int         `json:"status_code"`
 	Msg  string      `json:"status_msg"`
 	User interface{} `json:"user"`
 }
 
-func GetUserInfo(id string) *UserInfoRes {
-	userId, err := strconv.Atoi(id)
+func GetUserInfo(c *gin.Context) {
+	userID := c.Query("user_id")
+	id, err := strconv.Atoi(userID)
 	if err != nil {
-		return &UserInfoRes{
+		c.JSON(200, &UserInfoResp{
 			Code: -1,
-			Msg:  "无效id",
+			Msg:  "user_id is not valid",
 			User: nil,
-		}
+		})
+		return
 	}
-	userInfo, err := service.GetUserInfo(userId)
+	userInfo, err := service.GetUserInfo(id)
 	if err != nil {
-		return &UserInfoRes{
+		c.JSON(200, &UserInfoResp{
 			Code: -1,
 			Msg:  err.Error(),
 			User: nil,
-		}
+		})
+		return
 	}
-	return &UserInfoRes{
+	c.JSON(200, &UserInfoResp{
 		Code: 0,
 		Msg:  "success",
 		User: userInfo,
-	}
+	})
 }
 
 type RegisterAndLoginResp struct {
@@ -42,43 +51,48 @@ type RegisterAndLoginResp struct {
 	Token  string `json:"token"`
 }
 
-func Register(username string, password string) *RegisterAndLoginResp {
-	err := service.Register(username, password)
+func Register(c *gin.Context) {
+	userInfo := loginOrRegisterReq{}
+	_ = c.ShouldBind(&userInfo)
+	err := service.Register(userInfo.Username, userInfo.Password)
 	if err != nil {
-		return &RegisterAndLoginResp{
+		c.JSON(200, &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
-		}
+		})
+		return
 	}
-	data, err := service.Login(username, password)
+	data, err := service.Login(userInfo.Username, userInfo.Password)
 	if err != nil {
-		return &RegisterAndLoginResp{
+		c.JSON(200, &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
-		}
+		})
+		return
 	}
-
-	return &RegisterAndLoginResp{
+	c.JSON(200, &RegisterAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,
 		Token:  data.Token,
-	}
+	})
 }
 
-func Login(username string, password string) *RegisterAndLoginResp {
-	data, err := service.Login(username, password)
+func Login(c *gin.Context) {
+	userInfo := loginOrRegisterReq{}
+	_ = c.ShouldBind(&userInfo)
+	data, err := service.Login(userInfo.Username, userInfo.Password)
 	if err != nil {
-		return &RegisterAndLoginResp{
+		c.JSON(200, &RegisterAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
-		}
+		})
+		return
 	}
-
-	return &RegisterAndLoginResp{
+	c.JSON(200, &RegisterAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,
 		Token:  data.Token,
-	}
+	})
 }
