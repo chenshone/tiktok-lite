@@ -33,4 +33,13 @@ func InitRouter(r *gin.Engine) {
 	favorite := r.Group("/douyin/favorite/")
 	favorite.GET("list/", middleware.JWTAuth(), controller.GetFavoriteList)
 	favorite.POST("action/", middleware.JWTAuth(), controller.AddOrCancelFavorite)
+
+	// comment api
+	comment := r.Group("/douyin/comment/")
+	comment.POST("action/", middleware.JWTAuth(), controller.CommentAction)
+	comment.GET("list/", middleware.JWTAuth(), controller.GetCommentList)
+
+	// relation api
+	relation := r.Group("/douyin/relation/")
+	relation.POST("action/", middleware.JWTAuth(), controller.FollowUserOrNot)
 }

@@ -1,0 +1,6 @@
+
+### follow you
+POST http://localhost:8080/douyin/relation/action?token={{token}}&to_user_id=3&action_type=1
+
+### unfollow you
+POST http://localhost:8080/douyin/relation/action?token={{token}}&to_user_id=3&action_type=2

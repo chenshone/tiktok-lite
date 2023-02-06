@@ -23,6 +23,15 @@ func main() {
 		GORMTag: "foreignKey:UserID",
 	}))
 	favorite := g.GenerateModel("favorite")
-	g.ApplyBasic(user, video, favorite)
+	comment := g.GenerateModel("comment", gen.FieldRelate(field.BelongsTo, "Author", user, &field.RelateConfig{
+		GORMTag: "foreignKey:UserID",
+	}))
+	relation := g.GenerateModel("relation", gen.FieldRelate(field.BelongsTo, "User", user, &field.RelateConfig{
+		GORMTag: "foreignKey:UserID",
+	}), gen.FieldRelate(field.BelongsTo, "FollowUser", user, &field.RelateConfig{
+		GORMTag: "foreignKey:ToUserID",
+	}))
+
+	g.ApplyBasic(user, video, favorite, comment, relation)
 	g.Execute()
 }

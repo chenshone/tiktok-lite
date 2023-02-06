@@ -16,7 +16,7 @@ POST http://localhost:8080/douyin/user/register/
 Content-Type: application/json
 
 {
-    "username": "22man",
+    "username": "25man",
     "password": "123456"
 }
 
