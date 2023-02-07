@@ -87,7 +87,23 @@ type VideoListResp struct {
 
 func GetVideoListByUserId(c *gin.Context) {
 	userID := c.GetInt("user_id")
-	videoList, err := service.GetVideoListByUserId(userID)
+	query, ok := c.GetQuery("user_id")
+	if !ok {
+		c.JSON(200, &VideoListResp{
+			Code: -1,
+			Msg:  errors.New("参数缺失").Error(),
+		})
+		return
+	}
+	targetUserID, err := strconv.Atoi(query)
+	if err != nil {
+		c.JSON(200, &VideoListResp{
+			Code: -1,
+			Msg:  errors.New("参数错误").Error(),
+		})
+		return
+	}
+	videoList, err := service.GetVideoListByUserId(userID, targetUserID)
 	if err != nil {
 		c.JSON(200, &VideoListResp{
 			Code: -1,
@@ -104,7 +120,6 @@ func GetVideoListByUserId(c *gin.Context) {
 
 func GetVideoListByLastTime(c *gin.Context) {
 	lastTime := c.Query("last_time")
-	_ = c.Query("token")
 	if lastTime == "" {
 		lastTime = time.Now().Format("2006-01-02 15:04:05")
 	}
@@ -116,7 +131,12 @@ func GetVideoListByLastTime(c *gin.Context) {
 		})
 		return
 	}
-	videoList, err := service.GetVideoListByTime(t)
+	userID := -1
+	_, ok := c.GetQuery("token")
+	if ok {
+		userID = c.GetInt("user_id")
+	}
+	videoList, err := service.GetVideoListByTime(t, userID)
 	if err != nil {
 		c.JSON(200, &VideoListResp{
 			Code: -1,

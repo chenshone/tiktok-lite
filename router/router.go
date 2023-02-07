@@ -27,9 +27,9 @@ func InitRouter(r *gin.Engine) {
 
 	// feed api
 	feed := r.Group("/douyin/feed/")
-	feed.GET("/", controller.GetVideoListByLastTime)
+	feed.GET("/", middleware.JWTAuth(), controller.GetVideoListByLastTime)
 
-	// favorite api
+	// favorite api 点赞操作
 	favorite := r.Group("/douyin/favorite/")
 	favorite.GET("list/", middleware.JWTAuth(), controller.GetFavoriteList)
 	favorite.POST("action/", middleware.JWTAuth(), controller.AddOrCancelFavorite)
@@ -39,7 +39,8 @@ func InitRouter(r *gin.Engine) {
 	comment.POST("action/", middleware.JWTAuth(), controller.CommentAction)
 	comment.GET("list/", middleware.JWTAuth(), controller.GetCommentList)
 
-	// relation api
+	// relation api 关注操作
 	relation := r.Group("/douyin/relation/")
 	relation.POST("action/", middleware.JWTAuth(), controller.FollowUserOrNot)
+	relation.GET("list/", middleware.JWTAuth(), controller.GetFollowList)
 }

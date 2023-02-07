@@ -2,16 +2,19 @@ package service
 
 import (
 	"context"
+	"github.com/chenshone/tiktok-lite/dal"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"github.com/chenshone/tiktok-lite/dal/query"
+	"log"
 )
 
-func GetFavoriteList(userID int) ([]*VideoInfo, error) {
+func GetFavoriteList(userID, targetUserID int) ([]*VideoInfo, error) {
 	fav := q.Favorite
 	v := q.Video
 	favDo := fav.WithContext(context.Background())
 	vdo := v.WithContext(context.Background())
 
-	favoriteIDs, err := favDo.Select(fav.VideoID).Where(fav.UserID.Eq(int32(userID))).Find()
+	favoriteIDs, err := favDo.Select(fav.VideoID).Where(fav.UserID.Eq(int32(targetUserID))).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +27,19 @@ func GetFavoriteList(userID int) ([]*VideoInfo, error) {
 		return nil, err
 	}
 	videoList := make([]*VideoInfo, len(data))
+
+	r := q.Relation
+	rdo := r.WithContext(context.Background())
+	var isFollow, isFavorite bool
+
 	for i, v := range data {
+		isFavorite, isFollow = false, false
+		if _, err := rdo.Where(r.UserID.Eq(int32(userID)), r.ToUserID.Eq(v.Author.ID)).First(); err == nil {
+			isFollow = true
+		}
+		if _, err := favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(v.ID)).First(); err == nil {
+			isFavorite = true
+		}
 		videoList[i] = &VideoInfo{
 			ID:            int(v.ID),
 			PlayURL:       v.PlayURL,
@@ -32,13 +47,13 @@ func GetFavoriteList(userID int) ([]*VideoInfo, error) {
 			FavoriteCount: int(v.FavoriteCount),
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
-			IsFavorite:    true,
+			IsFavorite:    isFavorite,
 			Author: Author{
 				ID:            int(v.Author.ID),
 				Username:      v.Author.Username,
 				FollowCount:   int(v.Author.FollowCount),
 				FollowerCount: int(v.Author.FollowerCount),
-				IsFollow:      false,
+				IsFollow:      isFollow,
 			},
 		}
 	}
@@ -47,22 +62,48 @@ func GetFavoriteList(userID int) ([]*VideoInfo, error) {
 
 // AddOrCancelFavorite
 /*
-	IsAdd: true -> add
-	IsAdd: false -> cancel
+	IsAdd: 1 -> add
+	IsAdd: 2 -> cancel
 */
-func AddOrCancelFavorite(userID, videoID, IsAdd int) error {
-	fav := q.Favorite
+func AddOrCancelFavorite(userID, videoID, IsAdd int) (err error) {
+	tq := query.Use(dal.DB)
+	tx := tq.Begin()
+	defer func() {
+		if recover() != nil || err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	fav := tx.Favorite
 	favDo := fav.WithContext(context.Background())
-
-	if IsAdd == 1 {
+	v := tx.Video
+	vdo := v.WithContext(context.Background())
+	if IsAdd == 1 { // add
+		if _, err = favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(int32(videoID))).First(); err == nil {
+			return err
+		}
 		newFav := model.Favorite{
 			UserID:  int32(userID),
 			VideoID: int32(videoID),
 		}
-		err := favDo.Create(&newFav)
+		if err = favDo.Create(&newFav); err != nil {
+			return err
+		}
+		if _, err = vdo.Where(v.ID.Eq(int32(videoID))).Update(v.FavoriteCount, v.FavoriteCount.Add(1)); err != nil {
+			return err
+		}
+
+		return tx.Commit()
+	}
+	log.Printf("取消点赞\n")
+	res, err := favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(int32(videoID))).Delete()
+	if err != nil {
 		return err
 	}
-	_, err := favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(int32(videoID))).Delete()
-
-	return err
+	if res.RowsAffected > 0 {
+		if _, err = vdo.Where(v.ID.Eq(int32(videoID))).Update(v.FavoriteCount,
+			v.FavoriteCount.Sub(1)); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }

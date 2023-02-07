@@ -48,7 +48,7 @@ func CommentAction(c *gin.Context) {
 			Comment: data,
 		})
 	case 2: // 删除评论
-		err := service.RemoveComment(req.CommentID)
+		err := service.RemoveComment(req.CommentID, req.VideoID)
 		if err != nil {
 			c.JSON(200, &CommentActionResp{
 				Code: -1,
@@ -75,6 +75,7 @@ type CommentListResp struct {
 }
 
 func GetCommentList(c *gin.Context) {
+	userID := c.GetInt("user_id")
 	vid, ok := c.GetQuery("video_id")
 	if !ok {
 		c.JSON(200, &CommentListResp{
@@ -91,7 +92,7 @@ func GetCommentList(c *gin.Context) {
 		})
 		return
 	}
-	list, err := service.GetCommentList(videoID)
+	list, err := service.GetCommentList(userID, videoID)
 	if err != nil {
 		c.JSON(200, &CommentListResp{
 			Code: -1,

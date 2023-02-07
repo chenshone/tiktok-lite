@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/chenshone/tiktok-lite/service"
 	"github.com/gin-gonic/gin"
-	"log"
 	"strconv"
 )
 
@@ -16,7 +15,7 @@ func GetFavoriteList(c *gin.Context) {
 		})
 		return
 	}
-	id, err := strconv.Atoi(userID)
+	targetUserID, err := strconv.Atoi(userID)
 	if err != nil {
 		c.JSON(200, &VideoListResp{
 			Code: -1,
@@ -24,7 +23,8 @@ func GetFavoriteList(c *gin.Context) {
 		})
 		return
 	}
-	videoList, err := service.GetFavoriteList(id)
+	id := c.GetInt("user_id")
+	videoList, err := service.GetFavoriteList(id, targetUserID)
 	if err != nil {
 		c.JSON(200, &VideoListResp{
 			Code: -1,
@@ -66,7 +66,6 @@ func AddOrCancelFavorite(c *gin.Context) {
 		return
 	}
 	actionType, err := strconv.Atoi(isAdd)
-	log.Println(actionType == 1)
 	if err != nil || actionType != 1 && actionType != 2 {
 		c.JSON(200, &gin.H{
 			"status_code": -1,

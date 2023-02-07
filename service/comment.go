@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/chenshone/tiktok-lite/dal"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"github.com/chenshone/tiktok-lite/dal/query"
 	"log"
 	"time"
 )
@@ -23,28 +25,40 @@ type userinfo struct {
 	IsFollow      bool   `json:"is_follow"`
 }
 
-func PublishComment(userID, videoID int, content string) (*CommentInfo, error) {
+func PublishComment(userID, videoID int, content string) (res *CommentInfo, err error) {
+	tq := query.Use(dal.DB)
+	tx := tq.Begin() // 开启事务
+	defer func() {
+		if recover() != nil || err != nil {
+			_ = tx.Rollback()
+		}
+	}()
 	data := &model.Comment{
 		UserID:   int32(userID),
 		VideoID:  int32(videoID),
 		Content:  content,
 		CreateAt: time.Now(),
 	}
-	c := q.Comment
+	c := tx.Comment
 	cdo := c.WithContext(context.Background())
-	err := cdo.Save(data)
 	log.Println("save comment", data)
+	err = cdo.Save(data)
 	if err != nil {
 		return nil, err
 	}
 
-	u := q.User
+	u := tx.User
 	udo := u.WithContext(context.Background())
 	users, err := udo.Where(u.ID.Eq(int32(userID))).Find()
 	if err != nil || len(users) == 0 {
 		return nil, errors.New("用户不存在")
 	}
-
+	v := tx.Video
+	vdo := v.WithContext(context.Background())
+	_, err = vdo.Where(v.ID.Eq(int32(videoID))).Update(v.CommentCount, v.CommentCount.Add(1))
+	if err != nil {
+		return nil, err
+	}
 	return &CommentInfo{
 		ID: int(data.ID),
 		User: userinfo{
@@ -52,21 +66,35 @@ func PublishComment(userID, videoID int, content string) (*CommentInfo, error) {
 			Name:          users[0].Username,
 			FollowCount:   int(users[0].FollowerCount),
 			FollowerCount: int(users[0].FollowerCount),
-			IsFollow:      false,
+			IsFollow:      true,
 		},
 		Content:    data.Content,
 		CreateDate: data.CreateAt.Format("01-02"),
-	}, nil
+	}, tx.Commit()
 }
 
-func RemoveComment(commentID int) error {
-	c := q.Comment
+func RemoveComment(commentID, videoID int) (err error) {
+	tq := query.Use(dal.DB)
+	tx := tq.Begin() // 开启事务
+	defer func() {
+		if recover() != nil || err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	c := tx.Comment
 	cdo := c.WithContext(context.Background())
-	_, err := cdo.Where(c.ID.Eq(int32(commentID))).Delete()
-	return err
+	if _, err = cdo.Where(c.ID.Eq(int32(commentID))).Delete(); err != nil {
+		return err
+	}
+	v := tx.Video
+	vdo := v.WithContext(context.Background())
+	if _, err = vdo.Where(v.ID.Eq(int32(videoID))).Update(v.CommentCount, v.CommentCount.Sub(1)); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
-func GetCommentList(videoID int) ([]*CommentInfo, error) {
+func GetCommentList(userID, videoID int) ([]*CommentInfo, error) {
 	c := q.Comment
 	cdo := c.WithContext(context.Background())
 	comments, err := cdo.Where(c.VideoID.Eq(int32(videoID))).Preload(c.Author).Find()
@@ -74,7 +102,15 @@ func GetCommentList(videoID int) ([]*CommentInfo, error) {
 		return nil, err
 	}
 	commentList := make([]*CommentInfo, len(comments))
+	r := q.Relation
+	rdo := r.WithContext(context.Background())
+	var isFollow bool
 	for i, v := range comments {
+		if _, err := rdo.Where(r.UserID.Eq(int32(userID)), r.ToUserID.Eq(v.Author.ID)).First(); err == nil {
+			isFollow = true
+		} else {
+			isFollow = false
+		}
 		commentList[i] = &CommentInfo{
 			ID: int(v.ID),
 			User: userinfo{
@@ -82,7 +118,7 @@ func GetCommentList(videoID int) ([]*CommentInfo, error) {
 				Name:          v.Author.Username,
 				FollowCount:   int(v.Author.FollowCount),
 				FollowerCount: int(v.Author.FollowerCount),
-				IsFollow:      false,
+				IsFollow:      isFollow,
 			},
 			Content:    v.Content,
 			CreateDate: v.CreateAt.Format("01-02"),

@@ -22,23 +22,28 @@ type UserToken struct {
 	Token string
 }
 
-func GetUserInfo(id int) (*UserInfo, error) {
+func GetUserInfo(userID, targetUserId int) (*UserInfo, error) {
 	user := q.User
 	userDo := user.WithContext(context.Background())
-	data, err := userDo.Where(user.ID.Eq(int32(id))).Find()
+	data, err := userDo.Where(user.ID.Eq(int32(targetUserId))).Find()
 	if err != nil {
 		return nil, err
 	}
 	if len(data) == 0 {
 		return &UserInfo{}, nil
 	}
+	r := q.Relation
+	rdo := r.WithContext(context.Background())
+	resp, err := rdo.Where(r.UserID.Eq(int32(userID)), r.ToUserID.Eq(int32(targetUserId))).Find()
+	if err != nil {
+		return nil, err
+	}
 	return &UserInfo{
 		ID:            int(data[0].ID),
 		Username:      data[0].Username,
 		FollowCount:   int(data[0].FollowCount),
 		FollowerCount: int(data[0].FollowerCount),
-		// TODO: 是否关注
-		IsFollow: false,
+		IsFollow:      len(resp) > 0,
 	}, nil
 }
 

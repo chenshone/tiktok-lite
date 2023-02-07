@@ -19,7 +19,7 @@ type UserInfoResp struct {
 
 func GetUserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
-	id, err := strconv.Atoi(userID)
+	targetUserID, err := strconv.Atoi(userID)
 	if err != nil {
 		c.JSON(200, &UserInfoResp{
 			Code: -1,
@@ -28,7 +28,8 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	userInfo, err := service.GetUserInfo(id)
+	id := c.GetInt("user_id")
+	userInfo, err := service.GetUserInfo(id, targetUserID)
 	if err != nil {
 		c.JSON(200, &UserInfoResp{
 			Code: -1,
