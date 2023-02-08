@@ -70,7 +70,7 @@ func GetFollowList(c *gin.Context) {
 		})
 		return
 	}
-	userID, err := strconv.Atoi(uid)
+	targetUserID, err := strconv.Atoi(uid)
 	if err != nil {
 		c.JSON(200, &gin.H{
 			"status_code": -1,
@@ -78,7 +78,8 @@ func GetFollowList(c *gin.Context) {
 		})
 		return
 	}
-	followList, err := service.GetFollowList(userID)
+	id := c.GetInt("user_id")
+	followList, err := service.GetFollowList(id, targetUserID)
 	if err != nil {
 		c.JSON(200, &gin.H{
 			"status_code": -1,
@@ -90,5 +91,79 @@ func GetFollowList(c *gin.Context) {
 		"status_code": 0,
 		"status_msg":  "success",
 		"user_list":   followList,
+	})
+}
+
+// GetFollowerList 获取粉丝列表
+func GetFollowerList(c *gin.Context) {
+	uid, ok := c.GetQuery("user_id")
+	if !ok {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "参数不全",
+		})
+		return
+	}
+	targetUserID, err := strconv.Atoi(uid)
+	if err != nil {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "参数错误",
+		})
+		return
+	}
+	id := c.GetInt("user_id")
+	followerList, err := service.GetFollowerList(id, targetUserID)
+	if err != nil {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  err.Error(),
+		})
+		return
+	}
+	c.JSON(200, &gin.H{
+		"status_code": 0,
+		"status_msg":  "success",
+		"user_list":   followerList,
+	})
+}
+
+func GetFriendList(c *gin.Context) {
+	uid, ok := c.GetQuery("user_id")
+	if !ok {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "参数不全",
+		})
+		return
+	}
+	targetUserID, err := strconv.Atoi(uid)
+	if err != nil {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "参数错误",
+		})
+		return
+	}
+	id := c.GetInt("user_id")
+	if id != targetUserID {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "不允许获取其他用户的好友列表",
+		})
+		return
+	}
+	friendList, err := service.GetFriendList(targetUserID)
+	if err != nil {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  err.Error(),
+		})
+		return
+	}
+	c.JSON(200, &gin.H{
+		"status_code": 0,
+		"status_msg":  "success",
+		"user_list":   friendList,
 	})
 }

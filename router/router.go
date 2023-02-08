@@ -42,5 +42,7 @@ func InitRouter(r *gin.Engine) {
 	// relation api 关注操作
 	relation := r.Group("/douyin/relation/")
 	relation.POST("action/", middleware.JWTAuth(), controller.FollowUserOrNot)
-	relation.GET("list/", middleware.JWTAuth(), controller.GetFollowList)
+	relation.GET("follow/list/", middleware.JWTAuth(), controller.GetFollowList)
+	relation.GET("follower/list/", middleware.JWTAuth(), controller.GetFollowerList)
+	relation.GET("friend/list/", middleware.JWTAuth(), controller.GetFriendList)
 }
