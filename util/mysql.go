@@ -31,7 +31,8 @@ func main() {
 	}), gen.FieldRelate(field.BelongsTo, "FollowUser", user, &field.RelateConfig{
 		GORMTag: "foreignKey:ToUserID",
 	}))
+	message := g.GenerateModel("message")
 
-	g.ApplyBasic(user, video, favorite, comment, relation)
+	g.ApplyBasic(user, video, favorite, comment, relation, message)
 	g.Execute()
 }

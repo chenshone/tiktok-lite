@@ -1,0 +1,6 @@
+
+### 评论
+POST http://localhost:8080/douyin/message/action/?token={{token}}&to_user_id=3&action_type=1&content=sdad
+
+### 评论
+GET http://localhost:8080/douyin/message/chat/?token={{token}}&to_user_id=3

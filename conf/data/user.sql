@@ -1,0 +1,6 @@
+insert into MY_TABLE (id, username, password, follow_count, follower_count, avatar, create_at, update_at)
+values  (1, 'chenshone', '123456', 2, 1, 'http://avatar.com/1', '2023-01-21 00:32:48', '2023-01-21 00:32:48'),
+        (3, '22man', '123456', 1, 1, 'https://pics6.baidu.com/feed/ca1349540923dd546f63018e776583d89d8248b2.jpeg?token=9573aa8647e48fce0ad1814fc07ce257&s=50B0AD7341D077E9492984CC0300F0E3', '2023-01-31 22:24:43', '2023-01-31 22:24:43'),
+        (4, '23man', '123456', 0, 1, 'https://pics6.baidu.com/feed/ca1349540923dd546f63018e776583d89d8248b2.jpeg?token=9573aa8647e48fce0ad1814fc07ce257&s=50B0AD7341D077E9492984CC0300F0E3', '2023-02-07 01:14:05', '2023-02-07 01:14:05'),
+        (5, '24man', '123456', 0, 0, 'https://pics6.baidu.com/feed/ca1349540923dd546f63018e776583d89d8248b2.jpeg?token=9573aa8647e48fce0ad1814fc07ce257&s=50B0AD7341D077E9492984CC0300F0E3', '2023-02-07 01:14:10', '2023-02-07 01:14:10'),
+        (6, '25man', '123456', 0, 0, 'https://pics6.baidu.com/feed/ca1349540923dd546f63018e776583d89d8248b2.jpeg?token=9573aa8647e48fce0ad1814fc07ce257&s=50B0AD7341D077E9492984CC0300F0E3', '2023-02-07 01:14:14', '2023-02-07 01:14:14');

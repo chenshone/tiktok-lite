@@ -21,9 +21,9 @@ func PublishVideo(userId int, videoPath string, coverPath string, title string) 
 	return err
 }
 
-type VideoInfo struct {
+type videoInfo struct {
 	ID            int    `json:"id"`
-	Author        Author `json:"author"`
+	Author        author `json:"author"`
 	PlayURL       string `json:"play_url"`
 	CoverURL      string `json:"cover_url"`
 	FavoriteCount int    `json:"favorite_count"`
@@ -31,7 +31,7 @@ type VideoInfo struct {
 	IsFavorite    bool   `json:"is_favorite"`
 	Title         string `json:"title"`
 }
-type Author struct {
+type author struct {
 	ID            int    `json:"id"`
 	Username      string `json:"name"`
 	FollowCount   int    `json:"follow_count"`
@@ -39,7 +39,7 @@ type Author struct {
 	IsFollow      bool   `json:"is_follow"`
 }
 
-func GetVideoListByUserId(userID, targetUserID int) ([]*VideoInfo, error) {
+func GetVideoListByUserId(userID, targetUserID int) ([]*videoInfo, error) {
 	video := q.Video
 	vdo := video.WithContext(context.Background())
 	data, err := vdo.Where(video.UserID.Eq(int32(targetUserID))).Preload(video.Author).Find()
@@ -60,7 +60,7 @@ func GetVideoListByUserId(userID, targetUserID int) ([]*VideoInfo, error) {
 	var isFavorite bool
 	f := q.Favorite
 	fdo := f.WithContext(context.Background())
-	videos := make([]*VideoInfo, len(data))
+	videos := make([]*videoInfo, len(data))
 	for i, v := range data {
 		if _, err := fdo.Where(f.UserID.Eq(int32(userID)), f.VideoID.Eq(v.ID)).First(); err != nil {
 			isFavorite = false
@@ -68,14 +68,14 @@ func GetVideoListByUserId(userID, targetUserID int) ([]*VideoInfo, error) {
 			isFavorite = true
 		}
 
-		videos[i] = &VideoInfo{
+		videos[i] = &videoInfo{
 			ID:            int(v.ID),
 			PlayURL:       v.PlayURL,
 			CoverURL:      v.CoverURL,
 			FavoriteCount: int(v.FavoriteCount),
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
-			Author: Author{
+			Author: author{
 				ID:            int(v.Author.ID),
 				Username:      v.Author.Username,
 				FollowCount:   int(v.Author.FollowCount),
@@ -89,7 +89,7 @@ func GetVideoListByUserId(userID, targetUserID int) ([]*VideoInfo, error) {
 }
 
 // GetVideoListByTime 按发布时间倒序获取最新的视频列表
-func GetVideoListByTime(lastTime time.Time, userID int) ([]*VideoInfo, error) {
+func GetVideoListByTime(lastTime time.Time, userID int) ([]*videoInfo, error) {
 	v := q.Video
 	vdo := v.WithContext(context.Background())
 	data, err := vdo.Where(v.CreateAt.Lt(lastTime)).Preload(v.Author).Order(v.CreateAt.Desc()).Limit(30).Find()
@@ -103,7 +103,7 @@ func GetVideoListByTime(lastTime time.Time, userID int) ([]*VideoInfo, error) {
 	fdo := f.WithContext(context.Background())
 	r := q.Relation
 	rdo := r.WithContext(context.Background())
-	videos := make([]*VideoInfo, len(data))
+	videos := make([]*videoInfo, len(data))
 	for i, v := range data {
 		isFollow, isFavorite = false, false
 		if userID != -1 { // -1 表示未登录
@@ -116,14 +116,14 @@ func GetVideoListByTime(lastTime time.Time, userID int) ([]*VideoInfo, error) {
 				isFavorite = true
 			}
 		}
-		videos[i] = &VideoInfo{
+		videos[i] = &videoInfo{
 			ID:            int(v.ID),
 			PlayURL:       v.PlayURL,
 			CoverURL:      v.CoverURL,
 			FavoriteCount: int(v.FavoriteCount),
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
-			Author: Author{
+			Author: author{
 				ID:            int(v.Author.ID),
 				Username:      v.Author.Username,
 				FollowCount:   int(v.Author.FollowCount),

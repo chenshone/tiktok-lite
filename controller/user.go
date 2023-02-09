@@ -11,7 +11,7 @@ type loginOrRegisterReq struct {
 	Password string `json:"password" form:"password"`
 }
 
-type UserInfoResp struct {
+type userInfoResp struct {
 	Code int         `json:"status_code"`
 	Msg  string      `json:"status_msg"`
 	User interface{} `json:"user"`
@@ -21,7 +21,7 @@ func GetUserInfo(c *gin.Context) {
 	userID := c.Query("user_id")
 	targetUserID, err := strconv.Atoi(userID)
 	if err != nil {
-		c.JSON(200, &UserInfoResp{
+		c.JSON(200, &userInfoResp{
 			Code: -1,
 			Msg:  "user_id is not valid",
 			User: nil,
@@ -31,21 +31,21 @@ func GetUserInfo(c *gin.Context) {
 	id := c.GetInt("user_id")
 	userInfo, err := service.GetUserInfo(id, targetUserID)
 	if err != nil {
-		c.JSON(200, &UserInfoResp{
+		c.JSON(200, &userInfoResp{
 			Code: -1,
 			Msg:  err.Error(),
 			User: nil,
 		})
 		return
 	}
-	c.JSON(200, &UserInfoResp{
+	c.JSON(200, &userInfoResp{
 		Code: 0,
 		Msg:  "success",
 		User: userInfo,
 	})
 }
 
-type RegisterAndLoginResp struct {
+type registerAndLoginResp struct {
 	Code   int    `json:"status_code"`
 	Msg    string `json:"status_msg"`
 	UserID int    `json:"user_id"`
@@ -57,7 +57,7 @@ func Register(c *gin.Context) {
 	_ = c.ShouldBind(&userInfo)
 	err := service.Register(userInfo.Username, userInfo.Password)
 	if err != nil {
-		c.JSON(200, &RegisterAndLoginResp{
+		c.JSON(200, &registerAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		})
@@ -65,13 +65,13 @@ func Register(c *gin.Context) {
 	}
 	data, err := service.Login(userInfo.Username, userInfo.Password)
 	if err != nil {
-		c.JSON(200, &RegisterAndLoginResp{
+		c.JSON(200, &registerAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		})
 		return
 	}
-	c.JSON(200, &RegisterAndLoginResp{
+	c.JSON(200, &registerAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,
@@ -84,13 +84,13 @@ func Login(c *gin.Context) {
 	_ = c.ShouldBind(&userInfo)
 	data, err := service.Login(userInfo.Username, userInfo.Password)
 	if err != nil {
-		c.JSON(200, &RegisterAndLoginResp{
+		c.JSON(200, &registerAndLoginResp{
 			Code: -1,
 			Msg:  err.Error(),
 		})
 		return
 	}
-	c.JSON(200, &RegisterAndLoginResp{
+	c.JSON(200, &registerAndLoginResp{
 		Code:   0,
 		Msg:    "success",
 		UserID: data.ID,

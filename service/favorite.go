@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func GetFavoriteList(userID, targetUserID int) ([]*VideoInfo, error) {
+func GetFavoriteList(userID, targetUserID int) ([]*videoInfo, error) {
 	fav := q.Favorite
 	v := q.Video
 	favDo := fav.WithContext(context.Background())
@@ -26,7 +26,7 @@ func GetFavoriteList(userID, targetUserID int) ([]*VideoInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	videoList := make([]*VideoInfo, len(data))
+	videoList := make([]*videoInfo, len(data))
 
 	r := q.Relation
 	rdo := r.WithContext(context.Background())
@@ -40,7 +40,7 @@ func GetFavoriteList(userID, targetUserID int) ([]*VideoInfo, error) {
 		if _, err := favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(v.ID)).First(); err == nil {
 			isFavorite = true
 		}
-		videoList[i] = &VideoInfo{
+		videoList[i] = &videoInfo{
 			ID:            int(v.ID),
 			PlayURL:       v.PlayURL,
 			CoverURL:      v.CoverURL,
@@ -48,7 +48,7 @@ func GetFavoriteList(userID, targetUserID int) ([]*VideoInfo, error) {
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
 			IsFavorite:    isFavorite,
-			Author: Author{
+			Author: author{
 				ID:            int(v.Author.ID),
 				Username:      v.Author.Username,
 				FollowCount:   int(v.Author.FollowCount),

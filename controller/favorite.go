@@ -9,7 +9,7 @@ import (
 func GetFavoriteList(c *gin.Context) {
 	userID, ok := c.GetQuery("user_id")
 	if !ok {
-		c.JSON(200, &VideoListResp{
+		c.JSON(200, &videoListResp{
 			Code: -1,
 			Msg:  "参数错误",
 		})
@@ -17,7 +17,7 @@ func GetFavoriteList(c *gin.Context) {
 	}
 	targetUserID, err := strconv.Atoi(userID)
 	if err != nil {
-		c.JSON(200, &VideoListResp{
+		c.JSON(200, &videoListResp{
 			Code: -1,
 			Msg:  "参数错误",
 		})
@@ -26,13 +26,13 @@ func GetFavoriteList(c *gin.Context) {
 	id := c.GetInt("user_id")
 	videoList, err := service.GetFavoriteList(id, targetUserID)
 	if err != nil {
-		c.JSON(200, &VideoListResp{
+		c.JSON(200, &videoListResp{
 			Code: -1,
 			Msg:  err.Error(),
 		})
 		return
 	}
-	c.JSON(200, &VideoListResp{
+	c.JSON(200, &videoListResp{
 		Code:      0,
 		Msg:       "success",
 		VideoList: videoList,

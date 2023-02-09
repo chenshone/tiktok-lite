@@ -45,4 +45,8 @@ func InitRouter(r *gin.Engine) {
 	relation.GET("follow/list/", middleware.JWTAuth(), controller.GetFollowList)
 	relation.GET("follower/list/", middleware.JWTAuth(), controller.GetFollowerList)
 	relation.GET("friend/list/", middleware.JWTAuth(), controller.GetFriendList)
+
+	message := r.Group("/douyin/message/")
+	message.POST("action/", middleware.JWTAuth(), controller.SendMessage)
+	message.GET("chat/", middleware.JWTAuth(), controller.GetMessageList)
 }
