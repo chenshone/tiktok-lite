@@ -96,7 +96,7 @@ func GetMessageList(c *gin.Context) {
 		})
 		return
 	}
-	log.Printf("获取消息列表成功: %#v", list[0])
+	log.Printf("获取消息列表成功\n")
 	c.JSON(200, &gin.H{
 		"status_code":  0,
 		"status_msg":   "success",
