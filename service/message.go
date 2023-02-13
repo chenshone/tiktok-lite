@@ -22,6 +22,8 @@ func SendMessage(from, to int, content string) (err error) {
 
 type message struct {
 	Id         int    `json:"id"`
+	ToUserId   int    `json:"to_user_id"`
+	FromUserId int    `json:"from_user_id"`
 	Content    string `json:"content"`
 	CreateTime string `json:"create_time"`
 }
@@ -37,6 +39,8 @@ func GetMessageList(from, to int) ([]*message, error) {
 	for i, v := range resp {
 		list[i] = &message{
 			Id:         int(v.ID),
+			ToUserId:   int(v.ToUserID),
+			FromUserId: int(v.UserID),
 			Content:    v.Content,
 			CreateTime: v.CreateAt.Format("2006-01-02 15:04:05"),
 		}
