@@ -18,11 +18,17 @@ type CommentInfo struct {
 }
 
 type userinfo struct {
-	ID            int    `json:"id"`
-	Name          string `json:"name"`
-	FollowCount   int    `json:"follow_count"`
-	FollowerCount int    `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	FollowCount     int    `json:"follow_count"`
+	FollowerCount   int    `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  int    `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
 }
 
 func PublishComment(userID, videoID int, content string) (res *CommentInfo, err error) {
@@ -62,11 +68,17 @@ func PublishComment(userID, videoID int, content string) (res *CommentInfo, err 
 	return &CommentInfo{
 		ID: int(data.ID),
 		User: userinfo{
-			ID:            int(users[0].ID),
-			Name:          users[0].Username,
-			FollowCount:   int(users[0].FollowerCount),
-			FollowerCount: int(users[0].FollowerCount),
-			IsFollow:      true,
+			ID:              int(users[0].ID),
+			Name:            users[0].Username,
+			FollowCount:     int(users[0].FollowerCount),
+			FollowerCount:   int(users[0].FollowerCount),
+			IsFollow:        true,
+			Avatar:          users[0].Avatar,
+			BackgroundImage: users[0].BackgroundImage,
+			Signature:       users[0].Signature,
+			TotalFavorited:  int(users[0].TotalFavorited),
+			WorkCount:       int(users[0].WorkCount),
+			FavoriteCount:   int(users[0].FavoriteCount),
 		},
 		Content:    data.Content,
 		CreateDate: data.CreateAt.Format("01-02"),

@@ -55,6 +55,7 @@ func (j *JWT) ParseToken(tokenString string) (string, error) {
 		log.Println("invalid token")
 		return "", errors.New("invalid token")
 	}
+	// jwt解析成功，返回用户id
 	return claims.UserID, nil
 }
 

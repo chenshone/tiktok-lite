@@ -49,11 +49,17 @@ func GetFavoriteList(userID, targetUserID int) ([]*videoInfo, error) {
 			Title:         v.Title,
 			IsFavorite:    isFavorite,
 			Author: author{
-				ID:            int(v.Author.ID),
-				Username:      v.Author.Username,
-				FollowCount:   int(v.Author.FollowCount),
-				FollowerCount: int(v.Author.FollowerCount),
-				IsFollow:      isFollow,
+				ID:              int(v.Author.ID),
+				Username:        v.Author.Username,
+				FollowCount:     int(v.Author.FollowCount),
+				FollowerCount:   int(v.Author.FollowerCount),
+				IsFollow:        isFollow,
+				Avatar:          v.Author.Avatar,
+				BackgroundImage: v.Author.BackgroundImage,
+				Signature:       v.Author.Signature,
+				TotalFavorited:  int(v.Author.TotalFavorited),
+				WorkCount:       int(v.Author.WorkCount),
+				FavoriteCount:   int(v.Author.FavoriteCount),
 			},
 		}
 	}
@@ -77,6 +83,14 @@ func AddOrCancelFavorite(userID, videoID, IsAdd int) (err error) {
 	favDo := fav.WithContext(context.Background())
 	v := tx.Video
 	vdo := v.WithContext(context.Background())
+	u := tx.User
+	udo := u.WithContext(context.Background())
+
+	videoAuthor, err := vdo.Select(v.UserID).Where(v.ID.Eq(int32(videoID))).First()
+	if err != nil {
+		return err
+	}
+
 	if IsAdd == 1 { // add
 		if _, err = favDo.Where(fav.UserID.Eq(int32(userID)), fav.VideoID.Eq(int32(videoID))).First(); err == nil {
 			return err
@@ -91,7 +105,13 @@ func AddOrCancelFavorite(userID, videoID, IsAdd int) (err error) {
 		if _, err = vdo.Where(v.ID.Eq(int32(videoID))).Update(v.FavoriteCount, v.FavoriteCount.Add(1)); err != nil {
 			return err
 		}
-
+		if _, err = udo.Where(u.ID.Eq(videoAuthor.UserID)).Update(u.TotalFavorited,
+			u.TotalFavorited.Add(1)); err != nil {
+			return err
+		}
+		if _, err = udo.Where(u.ID.Eq(int32(userID))).Update(u.FavoriteCount, u.FavoriteCount.Add(1)); err != nil {
+			return err
+		}
 		return tx.Commit()
 	}
 	log.Printf("取消点赞\n")
@@ -104,6 +124,13 @@ func AddOrCancelFavorite(userID, videoID, IsAdd int) (err error) {
 			v.FavoriteCount.Sub(1)); err != nil {
 			return err
 		}
+	}
+	if _, err = udo.Where(u.ID.Eq(videoAuthor.UserID)).Update(u.TotalFavorited,
+		u.TotalFavorited.Sub(1)); err != nil {
+		return err
+	}
+	if _, err = udo.Where(u.ID.Eq(int32(userID))).Update(u.FavoriteCount, u.FavoriteCount.Sub(1)); err != nil {
+		return err
 	}
 	return tx.Commit()
 }

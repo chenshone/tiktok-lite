@@ -18,6 +18,7 @@ func JWTAuth() func(c *gin.Context) {
 		jwtToken := JWT{}
 		log.Println("URL: ", c.Request.URL.Path)
 		isSkip := false
+		// 因为feed视频流接口也需要token获取当前用户的id，但是feed接口不需要token验证
 		if c.Request.URL.Path == "/douyin/feed/" {
 			isSkip = true
 		}
@@ -61,6 +62,7 @@ func JWTAuth() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+		// 获取用户id
 		userId, err := strconv.Atoi(claim)
 		if err != nil {
 			if isSkip {
@@ -74,6 +76,7 @@ func JWTAuth() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+		// 判断用户是否存在
 		u := query.Q.User
 		udo := u.WithContext(context.Background())
 		find, err := udo.Where(u.ID.Eq(int32(userId))).Find()
@@ -101,6 +104,7 @@ func JWTAuth() func(c *gin.Context) {
 			c.Abort()
 			return
 		}
+		// 将用户id存入上下文
 		c.Set("user_id", userId)
 		c.Next()
 	}

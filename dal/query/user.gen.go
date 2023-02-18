@@ -35,6 +35,11 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.Avatar = field.NewString(tableName, "avatar")
 	_user.CreateAt = field.NewTime(tableName, "create_at")
 	_user.UpdateAt = field.NewTime(tableName, "update_at")
+	_user.BackgroundImage = field.NewString(tableName, "background_image")
+	_user.Signature = field.NewString(tableName, "signature")
+	_user.TotalFavorited = field.NewInt32(tableName, "total_favorited")
+	_user.WorkCount = field.NewInt32(tableName, "work_count")
+	_user.FavoriteCount = field.NewInt32(tableName, "favorite_count")
 
 	_user.fillFieldMap()
 
@@ -44,15 +49,20 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 type user struct {
 	userDo userDo
 
-	ALL           field.Asterisk
-	ID            field.Int32
-	Username      field.String
-	Password      field.String
-	FollowCount   field.Int32 // 关注数
-	FollowerCount field.Int32 // 粉丝数
-	Avatar        field.String
-	CreateAt      field.Time
-	UpdateAt      field.Time
+	ALL             field.Asterisk
+	ID              field.Int32
+	Username        field.String
+	Password        field.String
+	FollowCount     field.Int32 // 关注数
+	FollowerCount   field.Int32 // 粉丝数
+	Avatar          field.String
+	CreateAt        field.Time
+	UpdateAt        field.Time
+	BackgroundImage field.String
+	Signature       field.String
+	TotalFavorited  field.Int32 // 获赞数量
+	WorkCount       field.Int32 // 作品数量
+	FavoriteCount   field.Int32 // 点赞数量
 
 	fieldMap map[string]field.Expr
 }
@@ -77,6 +87,11 @@ func (u *user) updateTableName(table string) *user {
 	u.Avatar = field.NewString(table, "avatar")
 	u.CreateAt = field.NewTime(table, "create_at")
 	u.UpdateAt = field.NewTime(table, "update_at")
+	u.BackgroundImage = field.NewString(table, "background_image")
+	u.Signature = field.NewString(table, "signature")
+	u.TotalFavorited = field.NewInt32(table, "total_favorited")
+	u.WorkCount = field.NewInt32(table, "work_count")
+	u.FavoriteCount = field.NewInt32(table, "favorite_count")
 
 	u.fillFieldMap()
 
@@ -99,7 +114,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 8)
+	u.fieldMap = make(map[string]field.Expr, 13)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["username"] = u.Username
 	u.fieldMap["password"] = u.Password
@@ -108,6 +123,11 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["avatar"] = u.Avatar
 	u.fieldMap["create_at"] = u.CreateAt
 	u.fieldMap["update_at"] = u.UpdateAt
+	u.fieldMap["background_image"] = u.BackgroundImage
+	u.fieldMap["signature"] = u.Signature
+	u.fieldMap["total_favorited"] = u.TotalFavorited
+	u.fieldMap["work_count"] = u.WorkCount
+	u.fieldMap["favorite_count"] = u.FavoriteCount
 }
 
 func (u user) clone(db *gorm.DB) user {

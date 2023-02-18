@@ -5,6 +5,7 @@ import (
 	"github.com/chenshone/tiktok-lite/dal"
 	"github.com/chenshone/tiktok-lite/dal/model"
 	"github.com/chenshone/tiktok-lite/dal/query"
+	"log"
 )
 
 func FollowUser(userID, toUserID int) (err error) {
@@ -93,11 +94,17 @@ func GetFollowList(userID, targetUserID int) ([]*UserInfo, error) {
 			isFollow = false
 		}
 		list[i] = &UserInfo{
-			ID:            int(v.ToUserID),
-			Username:      v.FollowUser.Username,
-			FollowCount:   int(v.FollowUser.FollowCount),
-			FollowerCount: int(v.FollowUser.FollowerCount),
-			IsFollow:      isFollow,
+			ID:              int(v.ToUserID),
+			Username:        v.FollowUser.Username,
+			FollowCount:     int(v.FollowUser.FollowCount),
+			FollowerCount:   int(v.FollowUser.FollowerCount),
+			IsFollow:        isFollow,
+			Avatar:          v.FollowUser.Avatar,
+			BackgroundImage: v.FollowUser.BackgroundImage,
+			Signature:       v.FollowUser.Signature,
+			TotalFavorited:  int(v.FollowUser.TotalFavorited),
+			WorkCount:       int(v.FollowUser.WorkCount),
+			FavoriteCount:   int(v.FollowUser.FavoriteCount),
 		}
 	}
 	return list, nil
@@ -121,20 +128,45 @@ func GetFollowerList(userID, targetUserID int) ([]*UserInfo, error) {
 			isFollow = false
 		}
 		list[i] = &UserInfo{
-			ID:            int(v.UserID),
-			Username:      v.User.Username,
-			FollowCount:   int(v.User.FollowCount),
-			FollowerCount: int(v.User.FollowerCount),
-			IsFollow:      isFollow,
+			ID:              int(v.UserID),
+			Username:        v.User.Username,
+			FollowCount:     int(v.User.FollowCount),
+			FollowerCount:   int(v.User.FollowerCount),
+			IsFollow:        isFollow,
+			Avatar:          v.User.Avatar,
+			BackgroundImage: v.User.BackgroundImage,
+			Signature:       v.User.Signature,
+			TotalFavorited:  int(v.User.TotalFavorited),
+			WorkCount:       int(v.User.WorkCount),
+			FavoriteCount:   int(v.User.FavoriteCount),
 		}
 	}
 	return list, nil
 }
 
+type FriendInfo struct {
+	ID              int    `json:"id"`
+	Username        string `json:"name"`
+	FollowCount     int    `json:"follow_count"`
+	FollowerCount   int    `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  int    `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
+	Message         string `json:"message"` // 最新消息
+	MsgType         int    `json:"msgType"` // 消息类型 0 =>当前清求用户接收的消息，1=>当前请求用户发送的消息
+}
+
 // GetFriendList 获取好友列表，好友列表是指双方互相关注的用户
-func GetFriendList(userID int) ([]*UserInfo, error) {
+func GetFriendList(userID int) ([]*FriendInfo, error) {
+	log.Println("GetFriendList ", userID)
 	r := q.Relation
 	rdo := r.WithContext(context.Background())
+	m := q.Message
+	mdo := m.WithContext(context.Background())
 	// 获取关注列表
 	followIDs, err := rdo.Select(r.ToUserID).Where(r.UserID.Eq(int32(userID))).Find()
 	if err != nil {
@@ -149,15 +181,40 @@ func GetFriendList(userID int) ([]*UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]*UserInfo, len(resp))
+	list := make([]*FriendInfo, len(resp))
 	for i, v := range resp {
-		list[i] = &UserInfo{
-			ID:            int(v.UserID),
-			Username:      v.User.Username,
-			FollowCount:   int(v.User.FollowCount),
-			FollowerCount: int(v.User.FollowerCount),
-			IsFollow:      true,
+		// 获取最新消息
+		msgs, err := mdo.Where(m.UserID.Eq(int32(userID)), m.ToUserID.Eq(v.UserID)).Or(m.UserID.Eq(v.UserID),
+			m.ToUserID.Eq(int32(userID))).Order(m.CreateAt.Desc()).Find()
+		if err != nil {
+			return nil, err
+		}
+
+		var msg *model.Message = new(model.Message)
+		if len(msgs) > 0 {
+			msg = msgs[0]
+		}
+		msgType := 0
+		//1=>当前请求用户发送的消息
+		if msg.UserID == int32(userID) {
+			msgType = 1
+		}
+		list[i] = &FriendInfo{
+			ID:              int(v.UserID),
+			Username:        v.User.Username,
+			FollowCount:     int(v.User.FollowCount),
+			FollowerCount:   int(v.User.FollowerCount),
+			IsFollow:        true,
+			Avatar:          v.User.Avatar,
+			BackgroundImage: v.User.BackgroundImage,
+			Signature:       v.User.Signature,
+			TotalFavorited:  int(v.User.TotalFavorited),
+			WorkCount:       int(v.User.WorkCount),
+			FavoriteCount:   int(v.User.FavoriteCount),
+			Message:         msg.Content,
+			MsgType:         msgType,
 		}
 	}
+	log.Printf("user %d friend list: %v", userID, list)
 	return list, nil
 }

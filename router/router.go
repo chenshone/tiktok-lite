@@ -7,13 +7,6 @@ import (
 )
 
 func InitRouter(r *gin.Engine) {
-	// test api
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
 	// user api
 	user := r.Group("/douyin/user/")
 	user.GET("/", middleware.JWTAuth(), controller.GetUserInfo)
@@ -46,6 +39,7 @@ func InitRouter(r *gin.Engine) {
 	relation.GET("follower/list/", middleware.JWTAuth(), controller.GetFollowerList)
 	relation.GET("friend/list/", middleware.JWTAuth(), controller.GetFriendList)
 
+	// message api
 	message := r.Group("/douyin/message/")
 	message.POST("action/", middleware.JWTAuth(), controller.SendMessage)
 	message.GET("chat/", middleware.JWTAuth(), controller.GetMessageList)

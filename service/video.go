@@ -3,12 +3,21 @@ package service
 import (
 	"context"
 	"github.com/chenshone/tiktok-lite/conf"
+	"github.com/chenshone/tiktok-lite/dal"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"github.com/chenshone/tiktok-lite/dal/query"
 	"time"
 )
 
-func PublishVideo(userId int, videoPath string, coverPath string, title string) error {
-	video := q.Video
+func PublishVideo(userId int, videoPath string, coverPath string, title string) (err error) {
+	tq := query.Use(dal.DB)
+	tx := tq.Begin()
+	defer func() {
+		if recover() != nil || err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	video := tx.Video
 	do := video.WithContext(context.Background())
 
 	newVedio := model.Video{
@@ -17,8 +26,18 @@ func PublishVideo(userId int, videoPath string, coverPath string, title string) 
 		CoverURL: conf.BaseURL + coverPath,
 		Title:    title,
 	}
-	err := do.Create(&newVedio)
-	return err
+	err = do.Create(&newVedio)
+	if err != nil {
+		return err
+	}
+
+	u := tx.User
+	udo := u.WithContext(context.Background())
+	_, err = udo.Where(u.ID.Eq(int32(userId))).Update(u.WorkCount, u.WorkCount.Add(1))
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 type videoInfo struct {
@@ -32,11 +51,17 @@ type videoInfo struct {
 	Title         string `json:"title"`
 }
 type author struct {
-	ID            int    `json:"id"`
-	Username      string `json:"name"`
-	FollowCount   int    `json:"follow_count"`
-	FollowerCount int    `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
+	ID              int    `json:"id"`
+	Username        string `json:"name"`
+	FollowCount     int    `json:"follow_count"`
+	FollowerCount   int    `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  int    `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
 }
 
 func GetVideoListByUserId(userID, targetUserID int) ([]*videoInfo, error) {
@@ -76,11 +101,17 @@ func GetVideoListByUserId(userID, targetUserID int) ([]*videoInfo, error) {
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
 			Author: author{
-				ID:            int(v.Author.ID),
-				Username:      v.Author.Username,
-				FollowCount:   int(v.Author.FollowCount),
-				FollowerCount: int(v.Author.FollowerCount),
-				IsFollow:      isFollow,
+				ID:              int(v.Author.ID),
+				Username:        v.Author.Username,
+				FollowCount:     int(v.Author.FollowCount),
+				FollowerCount:   int(v.Author.FollowerCount),
+				IsFollow:        isFollow,
+				Avatar:          v.Author.Avatar,
+				BackgroundImage: v.Author.BackgroundImage,
+				Signature:       v.Author.Signature,
+				TotalFavorited:  int(v.Author.TotalFavorited),
+				WorkCount:       int(v.Author.WorkCount),
+				FavoriteCount:   int(v.Author.FavoriteCount),
 			},
 			IsFavorite: isFavorite,
 		}
@@ -124,11 +155,17 @@ func GetVideoListByTime(lastTime time.Time, userID int) ([]*videoInfo, error) {
 			CommentCount:  int(v.CommentCount),
 			Title:         v.Title,
 			Author: author{
-				ID:            int(v.Author.ID),
-				Username:      v.Author.Username,
-				FollowCount:   int(v.Author.FollowCount),
-				FollowerCount: int(v.Author.FollowerCount),
-				IsFollow:      isFollow,
+				ID:              int(v.Author.ID),
+				Username:        v.Author.Username,
+				FollowCount:     int(v.Author.FollowCount),
+				FollowerCount:   int(v.Author.FollowerCount),
+				IsFollow:        isFollow,
+				Avatar:          v.Author.Avatar,
+				BackgroundImage: v.Author.BackgroundImage,
+				Signature:       v.Author.Signature,
+				TotalFavorited:  int(v.Author.TotalFavorited),
+				WorkCount:       int(v.Author.WorkCount),
+				FavoriteCount:   int(v.Author.FavoriteCount),
 			},
 			IsFavorite: isFavorite,
 		}

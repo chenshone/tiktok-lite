@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"github.com/chenshone/tiktok-lite/dal/model"
+	"log"
 	"sort"
 	"strconv"
+	"time"
 )
 
 // 因为客户端采用轮询的方式获取消息，所以需要一个map来记录当前聊天的两个用户是否发送新消息
@@ -24,6 +26,7 @@ func SendMessage(from, to int, content string) (err error) {
 		return err
 	}
 	messageIsUpdate[strconv.Itoa(from)+"-"+strconv.Itoa(to)] = true
+	messageIsUpdate[strconv.Itoa(to)+"-"+strconv.Itoa(from)] = true
 	return nil
 }
 
@@ -35,14 +38,20 @@ type message struct {
 	CreateTime int64  `json:"create_time"`
 }
 
-func GetMessageList(from, to int) ([]*message, error) {
+func GetMessageList(from, to int, preMsgTime int64) ([]*message, error) {
+	if preMsgTime == 0 { // 用户第一次获取消息时候，清除map中的数据，以确保能够获取到
+		delete(messageIsUpdate, strconv.Itoa(from)+"-"+strconv.Itoa(to))
+	}
+	log.Printf("message last time: %v", time.UnixMilli(preMsgTime).Format("2006-01-02 15:04:05"))
+
 	if st, ok := messageIsUpdate[strconv.Itoa(from)+"-"+strconv.Itoa(to)]; ok && !st { // 存在且为false
 		return nil, nil
 	}
+
 	m := q.Message
 	mdo := m.WithContext(context.Background())
-	resp1, err := mdo.Where(m.UserID.Eq(int32(from)), m.ToUserID.Eq(int32(to))).Find()
-	resp2, err := mdo.Where(m.UserID.Eq(int32(to)), m.ToUserID.Eq(int32(from))).Find()
+	resp1, err := mdo.Where(m.UserID.Eq(int32(from)), m.ToUserID.Eq(int32(to)), m.CreateAt.Gt(time.UnixMilli(preMsgTime))).Find()
+	resp2, err := mdo.Where(m.UserID.Eq(int32(to)), m.ToUserID.Eq(int32(from)), m.CreateAt.Gt(time.UnixMilli(preMsgTime))).Find()
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +62,7 @@ func GetMessageList(from, to int) ([]*message, error) {
 			ToUserId:   int(v.ToUserID),
 			FromUserId: int(v.UserID),
 			Content:    v.Content,
-			CreateTime: v.CreateAt.Unix(),
+			CreateTime: v.CreateAt.UnixMilli(),
 		}
 	}
 	for i, v := range resp2 {
@@ -62,7 +71,7 @@ func GetMessageList(from, to int) ([]*message, error) {
 			ToUserId:   int(v.ToUserID),
 			FromUserId: int(v.UserID),
 			Content:    v.Content,
-			CreateTime: v.CreateAt.Unix(),
+			CreateTime: v.CreateAt.UnixMilli(),
 		}
 	}
 	sort.Slice(list, func(i, j int) bool {

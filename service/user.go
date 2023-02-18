@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/chenshone/tiktok-lite/conf"
 	"github.com/chenshone/tiktok-lite/dal/model"
 	"github.com/chenshone/tiktok-lite/util/util"
 	"strconv"
@@ -10,11 +11,17 @@ import (
 )
 
 type UserInfo struct {
-	ID            int    `json:"id"`
-	Username      string `json:"name"`
-	FollowCount   int    `json:"follow_count"`
-	FollowerCount int    `json:"follower_count"`
-	IsFollow      bool   `json:"is_follow"`
+	ID              int    `json:"id"`
+	Username        string `json:"name"`
+	FollowCount     int    `json:"follow_count"`
+	FollowerCount   int    `json:"follower_count"`
+	IsFollow        bool   `json:"is_follow"`
+	Avatar          string `json:"avatar"`
+	BackgroundImage string `json:"background_image"`
+	Signature       string `json:"signature"`
+	TotalFavorited  int    `json:"total_favorited"`
+	WorkCount       int    `json:"work_count"`
+	FavoriteCount   int    `json:"favorite_count"`
 }
 
 type UserToken struct {
@@ -39,11 +46,17 @@ func GetUserInfo(userID, targetUserId int) (*UserInfo, error) {
 		return nil, err
 	}
 	return &UserInfo{
-		ID:            int(data[0].ID),
-		Username:      data[0].Username,
-		FollowCount:   int(data[0].FollowCount),
-		FollowerCount: int(data[0].FollowerCount),
-		IsFollow:      len(resp) > 0,
+		ID:              int(data[0].ID),
+		Username:        data[0].Username,
+		FollowCount:     int(data[0].FollowCount),
+		FollowerCount:   int(data[0].FollowerCount),
+		IsFollow:        len(resp) > 0,
+		Avatar:          data[0].Avatar,
+		Signature:       data[0].Signature,
+		BackgroundImage: data[0].BackgroundImage,
+		TotalFavorited:  int(data[0].TotalFavorited),
+		WorkCount:       int(data[0].WorkCount),
+		FavoriteCount:   int(data[0].FavoriteCount),
 	}, nil
 }
 
@@ -72,10 +85,11 @@ func Register(username string, password string) error {
 	}
 
 	newUser := model.User{
-		Username: username,
-		Password: password,
-		Avatar: "https://pics6.baidu.com/feed/ca1349540923dd546f63018e776583d89d8248b2." +
-			"jpeg?token=9573aa8647e48fce0ad1814fc07ce257&s=50B0AD7341D077E9492984CC0300F0E3",
+		Username:        username,
+		Password:        password,
+		Avatar:          conf.BaseURL + "assets/avator.png",
+		BackgroundImage: conf.BaseURL + "assets/bg.jpeg",
+		Signature:       "hello",
 	}
 	err = do.Create(&newUser)
 	return err

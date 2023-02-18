@@ -88,7 +88,23 @@ func GetMessageList(c *gin.Context) {
 		})
 		return
 	}
-	list, err := service.GetMessageList(uid, toUserId)
+	preMsgTime, ok := c.GetQuery("pre_msg_time")
+	if !ok {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "缺少参数",
+		})
+		return
+	}
+	preMsgTimeInt, err := strconv.ParseInt(preMsgTime, 10, 64)
+	if err != nil {
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "参数错误",
+		})
+		return
+	}
+	list, err := service.GetMessageList(uid, toUserId, preMsgTimeInt)
 	if err != nil {
 		c.JSON(200, &gin.H{
 			"status_code": -1,

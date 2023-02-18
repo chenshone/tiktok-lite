@@ -48,21 +48,9 @@ func PublishVideo(c *gin.Context) {
 	videoPath := folderPath + filename
 
 	log.Println("视频上传: ", videoPath)
-	// 获取视频封面并上传文件
-	coverPath := videoPath + ".png"
-	err = util.GetVideoCover(videoPath, coverPath, 1)
-	if err != nil {
-		c.JSON(200, &gin.H{
-			"status_code": -1,
-			"status_msg":  "视频上传失败",
-		})
-		return
-	}
 	// 上传视频
 	err = c.SaveUploadedFile(video, videoPath)
 	if err != nil {
-		// 视频上传失败，删除封面
-		_ = os.Remove(coverPath)
 		c.JSON(200, &gin.H{
 			"status_code": -1,
 			"status_msg":  "视频上传失败",
@@ -70,6 +58,19 @@ func PublishVideo(c *gin.Context) {
 		return
 	}
 	log.Println("上传视频成功")
+	// 获取视频封面并上传文件
+	coverPath := videoPath + ".png"
+	err = util.GetVideoCover(videoPath, coverPath, 1)
+	if err != nil {
+		//获取封面失败，删除视频
+		_ = os.Remove(videoPath)
+		c.JSON(200, &gin.H{
+			"status_code": -1,
+			"status_msg":  "视频上传失败",
+		})
+		return
+	}
+
 	err = service.PublishVideo(userID, videoPath, coverPath, title)
 	if err != nil {
 		//数据库存储失败，删除视频和封面
