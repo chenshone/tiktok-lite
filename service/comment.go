@@ -107,8 +107,13 @@ func RemoveComment(commentID, videoID int) (err error) {
 }
 
 func GetCommentList(userID, videoID int) ([]*CommentInfo, error) {
+	v := q.Video
+	vdo := v.WithContext(context.Background())
 	c := q.Comment
 	cdo := c.WithContext(context.Background())
+	if _, err := vdo.Where(v.ID.Eq(int32(videoID))).First(); err != nil {
+		return nil, errors.New("视频不存在")
+	}
 	comments, err := cdo.Where(c.VideoID.Eq(int32(videoID))).Preload(c.Author).Find()
 	if err != nil {
 		return nil, err

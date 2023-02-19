@@ -2,8 +2,11 @@ package util
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/chenshone/tiktok-lite/conf"
 	"github.com/disintegration/imaging"
 	"github.com/golang-jwt/jwt/v4"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -105,4 +108,13 @@ func GetVideoCover(videoPath, snapshotPath string, frameNum int) error {
 	}
 
 	return nil
+}
+
+func Md5Salt(code string) string {
+	c := []byte(code)
+	s := []byte(conf.Salt)
+	MD5 := md5.New()
+	MD5.Write(c)
+	MD5.Write(s)
+	return hex.EncodeToString(MD5.Sum(nil))
 }

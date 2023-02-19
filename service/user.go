@@ -86,7 +86,7 @@ func Register(username string, password string) error {
 
 	newUser := model.User{
 		Username:        username,
-		Password:        password,
+		Password:        util.Md5Salt(password),
 		Avatar:          conf.BaseURL + "assets/avator.png",
 		BackgroundImage: conf.BaseURL + "assets/bg.jpeg",
 		Signature:       "hello",
@@ -118,7 +118,7 @@ func Login(username string, password string) (*UserToken, error) {
 	if len(data) == 0 {
 		return nil, errors.New("用户名/密码错误")
 	}
-	if data[0].Password != password {
+	if data[0].Password != util.Md5Salt(password) {
 		return nil, errors.New("用户名/密码错误")
 	}
 

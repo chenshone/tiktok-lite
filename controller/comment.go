@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type commentActionReq struct {
@@ -34,6 +35,13 @@ func CommentAction(c *gin.Context) {
 	}
 	switch req.ActionType {
 	case 1: // 添加评论
+		if strings.Trim(req.CommentText, " ") == "" {
+			c.JSON(200, &commentActionResp{
+				Code: -1,
+				Msg:  "参数不全/错误",
+			})
+			return
+		}
 		data, err := service.PublishComment(userID, req.VideoID, req.CommentText)
 		if err != nil {
 			c.JSON(200, &commentActionResp{
