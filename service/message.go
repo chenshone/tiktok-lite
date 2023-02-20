@@ -42,6 +42,7 @@ func GetMessageList(from, to int, preMsgTime int64) ([]*message, error) {
 	if preMsgTime == 0 { // 用户第一次获取消息时候，清除map中的数据，以确保能够获取到
 		delete(messageIsUpdate, strconv.Itoa(from)+"-"+strconv.Itoa(to))
 	}
+	log.Printf("message last time: %v", preMsgTime)
 	log.Printf("message last time: %v", time.UnixMilli(preMsgTime).Format("2006-01-02 15:04:05"))
 
 	if st, ok := messageIsUpdate[strconv.Itoa(from)+"-"+strconv.Itoa(to)]; ok && !st { // 存在且为false
