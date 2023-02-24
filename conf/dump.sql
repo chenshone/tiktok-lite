@@ -33,7 +33,7 @@ CREATE TABLE `comment` (
   KEY `comment_video` (`video_id`),
   CONSTRAINT `comment_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `comment_video` FOREIGN KEY (`video_id`) REFERENCES `video` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `favorite` (
   KEY `video_fav` (`video_id`),
   CONSTRAINT `user_fav` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `video_fav` FOREIGN KEY (`video_id`) REFERENCES `video` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -73,7 +73,7 @@ CREATE TABLE `message` (
   KEY `message_user` (`user_id`),
   CONSTRAINT `message_to_user` FOREIGN KEY (`to_user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `message_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,7 +93,7 @@ CREATE TABLE `relation` (
   KEY `relation_to_user` (`to_user_id`),
   CONSTRAINT `relation_to_user` FOREIGN KEY (`to_user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `relation_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='关注表';
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='关注表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,8 +112,13 @@ CREATE TABLE `user` (
   `avatar` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `background_image` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `signature` varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_favorited` int DEFAULT '0' COMMENT '获赞数量',
+  `work_count` int DEFAULT '0' COMMENT '作品数量',
+  `favorite_count` int DEFAULT '0' COMMENT '点赞数量',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,7 +141,7 @@ CREATE TABLE `video` (
   PRIMARY KEY (`id`),
   KEY `video_user` (`user_id`),
   CONSTRAINT `video_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -148,4 +153,4 @@ CREATE TABLE `video` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-02-09  9:37:41
+-- Dump completed on 2023-02-24  9:27:41
