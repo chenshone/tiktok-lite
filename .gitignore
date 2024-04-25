@@ -4,3 +4,5 @@ test_files
 assets
 .DS_Store
 test
+
+__pycache__
