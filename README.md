@@ -39,6 +39,13 @@ gen生成model文件在`util.mysql.go`文件
 
 定义user.proto
 
-day2 TODO:
+day2
+将config文件变为yaml文件，使用viper读取
 
-因为config/strings中的常量在py和go中都需要用到，所以要将config/strings中的文件变成yaml文件供py和go读取
+还是使用go做微服务，orm选择gorm
+
+选择logrus作为log库，自定义包装了logrus
+
+使用OpenTelemetry作为分布式链路追踪
+
+数据库选择mysql，使用gorm连接

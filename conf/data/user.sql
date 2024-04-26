@@ -1,8 +1,0 @@
-insert into MY_TABLE (id, username, password, follow_count, follower_count, avatar, create_at, update_at, background_image, signature, total_favorited, work_count, favorite_count)
-values  (1, 'chenshone', 'e44500b9c8cab2f46d316399f6c5ccab', 1, 3, 'http://192.168.31.88:8080/assets/avator.png', '2023-01-21 00:32:48', '2023-01-21 00:32:48', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 1, 3, 1),
-        (3, '22man', 'e44500b9c8cab2f46d316399f6c5ccab', 1, 1, 'http://192.168.31.88:8080/assets/avator.png', '2023-01-31 22:24:43', '2023-01-31 22:24:43', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 3, 1, 2),
-        (4, '23man', 'e44500b9c8cab2f46d316399f6c5ccab', 1, 0, 'http://192.168.31.88:8080/assets/avator.png', '2023-02-07 01:14:05', '2023-02-07 01:14:05', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 0, 1, 1),
-        (5, '24man', 'e44500b9c8cab2f46d316399f6c5ccab', 0, 0, 'http://192.168.31.88:8080/assets/avator.png', '2023-02-07 01:14:10', '2023-02-07 01:14:10', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 0, 0, 0),
-        (6, '25man', 'e44500b9c8cab2f46d316399f6c5ccab', 1, 0, 'http://192.168.31.88:8080/assets/avator.png', '2023-02-07 01:14:14', '2023-02-07 01:14:14', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 0, 0, 0),
-        (7, '28man', 'e44500b9c8cab2f46d316399f6c5ccab', 0, 0, 'http://192.168.31.88:8080/assets/avator.png', '2023-02-18 15:18:54', '2023-02-18 15:18:54', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 0, 0, 0),
-        (9, '30man', 'e44500b9c8cab2f46d316399f6c5ccab', 0, 0, 'http://192.168.31.88:8080/assets/avator.png', '2023-02-19 16:05:00', '2023-02-19 16:05:00', 'http://192.168.31.88:8080/assets/bg.jpeg', 'hello', 0, 0, 0);

@@ -1,0 +1,28 @@
+mysql:
+  db: "tiktok"
+  host: "localhost"
+  port: "3306"
+  user: "root"
+  password: "123456"
+  timezone: "Asia/Shanghai"
+  replica:
+    enable: false
+    db: ""
+    addr: ""
+    user: ""
+    password: ""
+    timezone: ""
+
+logger:
+  level: "INFO"
+  with_trance_state: "disable"
+  tied: "NONE"
+
+pod:
+  ip: "localhost"
+
+tracing:
+  otel_state: "enable"
+  otel_sampler: 0.01
+  endpoint: "http://localhost:14268/api/traces"
+

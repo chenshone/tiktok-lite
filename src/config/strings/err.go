@@ -3,9 +3,9 @@ package strings
 // Bad Request
 const (
 	GateWayErrorCode       = 40001
-	GateWayError           = "GuGoTik Gateway 暂时不能处理您的请求，请稍后重试！"
+	GateWayError           = "tiktok-lite Gateway 暂时不能处理您的请求，请稍后重试！"
 	GateWayParamsErrorCode = 40002
-	GateWayParamsError     = "GuGoTik Gateway 无法响应您的请求，请重启 APP 或稍后再试!"
+	GateWayParamsError     = "tiktok-lite Gateway 无法响应您的请求，请重启 APP 或稍后再试!"
 )
 
 // Server Inner Error

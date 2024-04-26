@@ -5,4 +5,4 @@ assets
 .DS_Store
 test
 
-__pycache__
+.vscode

@@ -1,5 +1,5 @@
 syntax = "proto3";
-// package rpc.user;
+package rpc.user;
 option go_package = "tiktok-lite/src/rpc/user";
 
 message UserRequest {
@@ -9,17 +9,17 @@ message UserRequest {
 
 message UserResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
-  User user = 3; // 用户信息
+  string status_msg = 2;
+  User user = 3;
 }
 
 message UserExistRequest {
-  uint32 user_id = 1; // 用户id
+  uint32 user_id = 1;
 }
 
 message UserExistResponse {
   int32 status_code = 1; // 状态码，0-成功，其他值-失败
-  string status_msg = 2; // 返回状态描述
+  string status_msg = 2;
   bool existed = 3;
 }
 
